@@ -1,0 +1,41 @@
+// Code shared between demo.
+
+#if !defined(_UTILS_H)
+
+#define assert(expr) { if(!(expr)) { *(int *)0 = 0; } }
+
+#define gpu_new(Type) (Type *)gpu_malloc(sizeof(Type))
+void *gpu_malloc(size_t size) {
+    void *res = 0;
+    cudaError_t success;
+
+    success = cudaMalloc(&res, size);
+    if(success != cudaSuccess) {
+        res = 0;
+        printf("malloc failed! \"%s\"\n", cudaGetErrorString(success));
+        //assert(0);
+    }
+
+    return(res);
+}
+
+bool gpu_memcpy(void *dst, void *src, size_t cnt, cudaMemcpyKind kind) {
+    bool res = false;
+    cudaError_t success;
+
+    assert((kind == cudaMemcpyHostToHost) || (kind == cudaMemcpyHostToDevice) ||
+           (kind == cudaMemcpyDeviceToHost) || (kind == cudaMemcpyDeviceToDevice));
+
+    success = cudaMemcpy(dst, src, cnt, kind);
+    if(success == cudaSuccess) { res = true; }
+    else {
+        res = false;
+        printf("memcpy failed! \"%s\"\n", cudaGetErrorString(success));
+        //assert(0);
+    }
+
+    return(res);
+}
+
+#define _UTILS_H
+#endif
